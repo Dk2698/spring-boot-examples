@@ -10,6 +10,9 @@ import java.util.Date;
 @Getter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@Builder
 @Document
 public class Journal {
 

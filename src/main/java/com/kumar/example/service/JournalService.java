@@ -19,7 +19,7 @@ public class JournalService {
     private final JournalRepository journalRepository;
     public final JournalMapper journalMapper;
 
-    public JournalDTO saveEntry(JournalDTO journalDTO){
+    public JournalDTO saveEntry(JournalDTO journalDTO) {
         log.debug("before save dto ->{}", journalDTO);
         journalDTO.setDate(new Date());
         final Journal save = journalRepository.save(journalMapper.toEntity(journalDTO));
@@ -27,14 +27,14 @@ public class JournalService {
         return journalMapper.toDto(save);
     }
 
-    public List<JournalDTO> getAll(){
+    public List<JournalDTO> getAll() {
         final List<Journal> journals = journalRepository.findAll();
         return journalMapper.toDto(journals);
     }
 
     public Optional<JournalDTO> getJournalById(String id) {
         final Optional<Journal> journal = journalRepository.findById(id);
-        if(journal.isPresent()){
+        if (journal.isPresent()) {
             final JournalDTO dto = journalMapper.toDto(journal.get());
             return Optional.ofNullable(dto);
         }
