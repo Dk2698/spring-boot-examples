@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: example-api
+  data:
+    mongodb:
+      uri: mongodb+srv://xxxx:xxxx@xxxx.3mu61hq1111.mongodb.net/?retryWrites=true&w=majority
+      database: ${DB_NAME:journaldb}
+      auto-index-creation: true
+
+#server:
+#  port: 8083
+#  servlet:
+#    context-path: /journal
