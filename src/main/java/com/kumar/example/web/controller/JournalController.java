@@ -54,14 +54,14 @@ public class JournalController {
         return journalDTO.map(dto -> new ResponseEntity<>(dto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/{userName}")
+    @GetMapping("/user/{userName}")
     public ResponseEntity<?> getJournalByUserName(@PathVariable(name = "userName") String userName) {
         final UserDTO existingUserName = userService.findByUserName(userName);
         final List<Journal> journalList = existingUserName.getJournalList();
         if (journalList != null && !journalList.isEmpty()) {
             new ResponseEntity<>(journalList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return null;
     }
 
     @GetMapping
@@ -79,8 +79,26 @@ public class JournalController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @DeleteMapping("/{myId}/{userName}")
+    public ResponseEntity<?> deleteJournalByIdAndUser(@PathVariable(name = "myId") String id, @PathVariable(name = "userName") String userName) {
+        journalService.deleteByById(id,userName);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PutMapping("/{myId}")
     public ResponseEntity<JournalDTO> updateJournalById(@PathVariable(name = "myId") String id, @RequestBody JournalDTO journalDTO) {
+        final JournalDTO exitIngjournalDTO = journalService.getJournalById(id).orElse(null);
+        if (exitIngjournalDTO != null) {
+            exitIngjournalDTO.setTitle(journalDTO.getTitle() != null && !journalDTO.getTitle().equals("") ? journalDTO.getTitle() : exitIngjournalDTO.getTitle());
+            exitIngjournalDTO.setContent(journalDTO.getContent() != null && !journalDTO.getContent().equals("") ? journalDTO.getContent() : exitIngjournalDTO.getContent());
+            journalService.saveEntry(exitIngjournalDTO);
+            return new ResponseEntity<>(exitIngjournalDTO, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/{myId}/{userName}")
+    public ResponseEntity<JournalDTO> updateJournalById(@PathVariable(name = "myId") String id, @PathVariable(name = "userName") String userName, @RequestBody JournalDTO journalDTO) {
         final JournalDTO exitIngjournalDTO = journalService.getJournalById(id).orElse(null);
         if (exitIngjournalDTO != null) {
             exitIngjournalDTO.setTitle(journalDTO.getTitle() != null && !journalDTO.getTitle().equals("") ? journalDTO.getTitle() : exitIngjournalDTO.getTitle());

@@ -56,4 +56,12 @@ public class JournalService {
         userService.saveEntry(userDTO);
         return journalMapper.toDto(journal);
     }
+
+    public void deleteByById(String id, String userName) {
+        //cascade manual delete journal and also delete from user entity and update
+        final UserDTO userDTO = userService.findByUserName(userName);
+        userDTO.getJournalList().removeIf(userDTO1 -> userDTO1.getId().equals(id));
+        userService.saveEntry(userDTO);
+        journalRepository.deleteById(id);
+    }
 }
