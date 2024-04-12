@@ -1,7 +1,10 @@
 package com.kumar.example.web.controller;
 
+import com.kumar.example.data.entity.Journal;
 import com.kumar.example.service.JournalService;
+import com.kumar.example.service.UserService;
 import com.kumar.example.service.dto.JournalDTO;
+import com.kumar.example.service.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,8 @@ import java.util.Optional;
 public class JournalController {
 
     private final JournalService journalService;
+    private final UserService userService;
+
 
     @PostMapping
     public ResponseEntity<JournalDTO> createEntry(@RequestBody JournalDTO journalDTO) {
@@ -31,10 +36,32 @@ public class JournalController {
         }
     }
 
+    @PostMapping("/{userName}")
+    public ResponseEntity<JournalDTO> createJournalForUser(@RequestBody JournalDTO journalDTO, @PathVariable String userName) {
+        log.debug("rest request body ->{}", journalDTO);
+        try {
+            final JournalDTO journalDTO1 = journalService.createJournalForUser(journalDTO, userName);
+            return new ResponseEntity<>(journalDTO1, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/{myId}")
     public ResponseEntity<JournalDTO> getJournalById(@PathVariable(name = "myId") String id) {
         final Optional<JournalDTO> journalDTO = journalService.getJournalById(id);
         return journalDTO.map(dto -> new ResponseEntity<>(dto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/{userName}")
+    public ResponseEntity<?> getJournalByUserName(@PathVariable(name = "userName") String userName) {
+        final UserDTO existingUserName = userService.findByUserName(userName);
+        final List<Journal> journalList = existingUserName.getJournalList();
+        if (journalList != null && !journalList.isEmpty()) {
+            new ResponseEntity<>(journalList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping

@@ -3,12 +3,13 @@ package com.kumar.example.service;
 import com.kumar.example.data.entity.Journal;
 import com.kumar.example.data.repository.JournalRepository;
 import com.kumar.example.service.dto.JournalDTO;
+import com.kumar.example.service.dto.UserDTO;
 import com.kumar.example.service.mapper.JournalMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,9 +20,11 @@ public class JournalService {
     private final JournalRepository journalRepository;
     public final JournalMapper journalMapper;
 
+    private final UserService userService;
+
     public JournalDTO saveEntry(JournalDTO journalDTO) {
         log.debug("before save dto ->{}", journalDTO);
-        journalDTO.setDate(new Date());
+        journalDTO.setDate(LocalDateTime.now());
         final Journal save = journalRepository.save(journalMapper.toEntity(journalDTO));
         log.debug("after save entity ->{}", save);
         return journalMapper.toDto(save);
@@ -43,5 +46,14 @@ public class JournalService {
 
     public void deleteByById(String id) {
         journalRepository.deleteById(id);
+    }
+
+    public JournalDTO createJournalForUser(JournalDTO journalDTO, String userName) {
+        final UserDTO userDTO = userService.findByUserName(userName);
+        journalDTO.setDate(LocalDateTime.now());
+        final Journal journal = journalRepository.save(journalMapper.toEntity(journalDTO));
+        userDTO.getJournalList().add(journal);
+        userService.saveEntry(userDTO);
+        return journalMapper.toDto(journal);
     }
 }
