@@ -8,6 +8,7 @@ import com.kumar.example.service.mapper.JournalMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,13 +49,21 @@ public class JournalService {
         journalRepository.deleteById(id);
     }
 
+    @Transactional
     public JournalDTO createJournalForUser(JournalDTO journalDTO, String userName) {
-        final UserDTO userDTO = userService.findByUserName(userName);
-        journalDTO.setDate(LocalDateTime.now());
-        final Journal journal = journalRepository.save(journalMapper.toEntity(journalDTO));
-        userDTO.getJournalList().add(journal);
-        userService.saveEntry(userDTO);
-        return journalMapper.toDto(journal);
+        try {
+            final UserDTO userDTO = userService.findByUserName(userName);
+            journalDTO.setDate(LocalDateTime.now());
+            final Journal journal = journalRepository.save(journalMapper.toEntity(journalDTO));
+            userDTO.getJournalList().add(journal);
+            // thows exception
+        userDTO.setUserName(null);
+            userService.saveEntry(userDTO);
+            return journalMapper.toDto(journal);
+        } catch (Exception e){
+            log.error("unable to save -> {}", e.getMessage());
+            throw  new RuntimeException("An error occurred while saving the entry.", e);
+        }
     }
 
     public void deleteByById(String id, String userName) {
